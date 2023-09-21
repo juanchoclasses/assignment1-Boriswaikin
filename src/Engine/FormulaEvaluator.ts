@@ -2,7 +2,37 @@ import Cell from "./Cell"
 import SheetMemory from "./SheetMemory"
 import { ErrorMessages } from "./GlobalDefinitions";
 
+// export interface IStack<T> {
+//   push(item: T): void;
+//   pop(): T | undefined;
+//   peek(): T | undefined;
+//   size(): number;
+// }
 
+// export class Stack<T> implements IStack<T> {
+//   private storage: T[] = [];
+
+//   constructor(private capacity: number = Infinity) {}
+
+//   push(item: T): void {
+//     if (this.size() === this.capacity) {
+//       throw Error("Stack has reached max capacity, you cannot add more items");
+//     }
+//     this.storage.push(item);
+//   }
+
+//   pop(): T | undefined {
+//     return this.storage.pop();
+//   }
+
+//   peek(): T | undefined {
+//     return this.storage[this.size() - 1];
+//   }
+
+//   size(): number {
+//     return this.storage.length;
+//   }
+// }
 
 export class FormulaEvaluator {
   // Define a function called update that takes a string parameter and returns a number
@@ -43,12 +73,59 @@ export class FormulaEvaluator {
     * 
    */
 
+  calculate(formula: FormulaType): number {
+    const stack: number[] = [];
+    let num: number = 0;
+    let sign: string = '+';
+    const n: number = formula.length;
+    for (let i = 0; i < n; i++) {
+      const str: string = formula[i];
+      if (/\d/.test(str)) {
+        num = num * 10 + parseInt(str,10);
+      }
+      else if (str === "("){
+        let j: number;
+        let braces: number = 1;
+        for (j = i + 1; j < n; j++) {
+          if (formula[j] === "(") braces++;
+          else if (formula[j] === ")") braces--;
+          if (braces === 0) break;
+        }
+        num = this.calculate(formula.slice(i + 1, j));
+        i = j;
+      }
+      if (str === '+' || str === '-' || str === '*' || str === '/' || i === n - 1) {
+        switch (sign) {
+            case '+':
+                stack.push(num);
+                break;
+            case '-':
+                stack.push(-num);
+                break;
+            case '*':
+                let val: number | undefined = stack.pop();
+                if (val!=undefined) stack.push(val * num);
+                break;
+            case '/':
+                val = stack.pop();
+                if (val!=undefined) stack.push(val / num);
+                break;
+        }
+        num = 0;
+        sign = str;
+      }
+    }
+    let result: number = 0;
+    while (stack.length > 0) result += stack.pop()!;
+    return result;
+  }
+
   evaluate(formula: FormulaType) {
 
-
+    // const stack = new Stack<number>();
     // set the this._result to the length of the formula
 
-    this._result = formula.length;
+    this._result = this.calculate(formula);
     this._errorMessage = "";
 
     switch (formula.length) {
@@ -136,6 +213,7 @@ export class FormulaEvaluator {
     if (formula.length === 0) {
       return [0, ErrorMessages.invalidCell];
     }
+  
 
 
     let value = cell.getValue();
