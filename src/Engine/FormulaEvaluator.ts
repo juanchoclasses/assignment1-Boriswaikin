@@ -45,7 +45,7 @@ export class FormulaEvaluator {
     const stack: number[] = [];
     let num: number = 0;
     let sign: string = '+';
-    let braces: number = -1;
+    let braces: number = 0;
     const n: number = formula.length;
     for (let i = 0; i < n; i++) {
       const str: string = formula[i];
@@ -62,6 +62,9 @@ export class FormulaEvaluator {
         }
         num = this.calculate(formula.slice(i + 1, j));
         i = j;
+      }
+      else if (str === ")") {
+        braces = -1;
       }
       if (str === '+' || str === '-' || str === '*' || str === '/' || i === n - 1) {
         switch (sign) {
@@ -84,9 +87,14 @@ export class FormulaEvaluator {
         num = 0;
         sign = str;
       }
-      //check if the last str is '+','-','*','/' or ')' without '(' before or only '('
-      if (i===n-1 && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/' || formula[i] === ')' && braces === -1) || braces === 1){
+      //check if the last str is '+','-','*','/' 
+      if (i===n-1 && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
         this._errorMessage = ErrorMessages.invalidFormula;
+      }
+      //check if the last str is ')' but without '(' before 
+      //check if the formula only contains '('
+      if (braces === -1 || braces === 1){
+        this._errorMessage = ErrorMessages.missingParentheses;
       }
     }
     let result: number = 0;
@@ -97,9 +105,6 @@ export class FormulaEvaluator {
   }
 
   evaluate(formula: FormulaType) {
-
-    // const stack = new Stack<number>();
-    // set the this._result to the length of the formula
 
     this._result = this.calculate(formula);
     const n: number = formula.length;
@@ -115,7 +120,6 @@ export class FormulaEvaluator {
     if (n === 0) {
       this._errorMessage = ErrorMessages.emptyFormula;
     } 
-
 
     // switch (formula.length) {
     //   case 0:
