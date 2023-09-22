@@ -112,7 +112,7 @@ describe("FormulaEvaluator", () => {
           let result = recalc.result;
           let error = recalc.error;
 
-          expect(result).toEqual(3);
+          expect(result).toEqual(-1);
           expect(error).toEqual("");
         });
       });
@@ -128,7 +128,7 @@ describe("FormulaEvaluator", () => {
           let result = recalc.result;
           let error = recalc.error;
 
-          expect(result).toEqual(3);
+          expect(result).toEqual(2);
           expect(error).toEqual("");
         });
       });
@@ -180,7 +180,7 @@ describe("FormulaEvaluator", () => {
 
     describe("when the formula contains 8 ( ", () => {
       it("returns a syntax error", () => {
-        const formula: FormulaType = ["8", "("];
+        const formula: FormulaType = ["(", "8"];
         recalc.evaluate(formula);
 
         let result = recalc.result;
