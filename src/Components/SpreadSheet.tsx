@@ -69,6 +69,13 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
 
   }
 
+  function checkUserLogin(){
+    if (spreadSheetClient.userName.length === 0) {
+      alert("Please enter a user name");
+      return false;
+    }
+  }
+
   /**
    * 
    * @param event 
@@ -83,7 +90,7 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
    */
   async function onCommandButtonClick(text: string): Promise<void> {
 
-
+    checkUserLogin();
     switch (text) {
       case ButtonNames.edit_toggle:
         if (currentlyEditing) {
@@ -122,6 +129,7 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
     spreadSheetClient.setEditStatus(true);
     spreadSheetClient.addToken(trueText);
 
+    checkUserLogin()
     updateDisplayValues();
 
   }
@@ -153,6 +161,7 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
     else {
       spreadSheetClient.requestViewByLabel(realCellLabel);
 
+      checkUserLogin();
       updateDisplayValues();
     }
 
