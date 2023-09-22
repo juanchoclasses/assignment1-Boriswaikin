@@ -2,38 +2,6 @@ import Cell from "./Cell"
 import SheetMemory from "./SheetMemory"
 import { ErrorMessages } from "./GlobalDefinitions";
 
-// export interface IStack<T> {
-//   push(item: T): void;
-//   pop(): T | undefined;
-//   peek(): T | undefined;
-//   size(): number;
-// }
-
-// export class Stack<T> implements IStack<T> {
-//   private storage: T[] = [];
-
-//   constructor(private capacity: number = Infinity) {}
-
-//   push(item: T): void {
-//     if (this.size() === this.capacity) {
-//       throw Error("Stack has reached max capacity, you cannot add more items");
-//     }
-//     this.storage.push(item);
-//   }
-
-//   pop(): T | undefined {
-//     return this.storage.pop();
-//   }
-
-//   peek(): T | undefined {
-//     return this.storage[this.size() - 1];
-//   }
-
-//   size(): number {
-//     return this.storage.length;
-//   }
-// }
-
 export class FormulaEvaluator {
   // Define a function called update that takes a string parameter and returns a number
   private _errorOccured: boolean = false;
@@ -77,15 +45,16 @@ export class FormulaEvaluator {
     const stack: number[] = [];
     let num: number = 0;
     let sign: string = '+';
+    let braces: number = -1;
     const n: number = formula.length;
     for (let i = 0; i < n; i++) {
       const str: string = formula[i];
       if (/\d/.test(str)) {
         num = num * 10 + parseInt(str,10);
       }
-      else if (str === "("){
+      else if (str === "(" && i!==n-1){
         let j: number;
-        let braces: number = 1;
+        braces = 1;
         for (j = i + 1; j < n; j++) {
           if (formula[j] === "(") braces++;
           else if (formula[j] === ")") braces--;
@@ -103,20 +72,27 @@ export class FormulaEvaluator {
                 stack.push(-num);
                 break;
             case '*':
-                let val: number | undefined = stack.pop();
+                var val: number | undefined = stack.pop();
                 if (val!=undefined) stack.push(val * num);
                 break;
             case '/':
-                val = stack.pop();
+                var val: number | undefined = stack.pop();
                 if (val!=undefined) stack.push(val / num);
+                if (num === 0) {this._errorMessage = ErrorMessages.divideByZero;}
                 break;
         }
         num = 0;
         sign = str;
       }
+      //check if the last str is '+','-','*','/' or ')' without '(' before or only '('
+      if (i===n-1 && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/' || formula[i] === ')' && braces === -1) || braces === 1){
+        this._errorMessage = ErrorMessages.invalidFormula;
+      }
     }
     let result: number = 0;
-    while (stack.length > 0) result += stack.pop()!;
+    //Design for the case ["(", "8"], it returns 8
+    if (stack.length > 0)  while (stack.length > 0) result += stack.pop()!;
+    else result = num;
     return result;
   }
 
@@ -126,37 +102,50 @@ export class FormulaEvaluator {
     // set the this._result to the length of the formula
 
     this._result = this.calculate(formula);
-    this._errorMessage = "";
-
-    switch (formula.length) {
-      case 0:
-        this._errorMessage = ErrorMessages.emptyFormula;
-        break;
-      case 7:
-        this._errorMessage = ErrorMessages.partial;
-        break;
-      case 8:
-        this._errorMessage = ErrorMessages.divideByZero;
-        break;
-      case 9:
-        this._errorMessage = ErrorMessages.invalidCell;
-        break;
-      case 10:
+    const n: number = formula.length;
+    for (let i = 0; i < n; i++) {
+      let j = i-1;
+      const str: string = formula[i];
+      const str2: string = formula[j];
+      if (i>0 && !/\d/.test(str) && !/\d/.test(str2)) {
         this._errorMessage = ErrorMessages.invalidFormula;
-        break;
-      case 11:
-        this._errorMessage = ErrorMessages.invalidNumber;
-        break;
-      case 12:
-        this._errorMessage = ErrorMessages.invalidOperator;
-        break;
-      case 13:
-        this._errorMessage = ErrorMessages.missingParentheses;
-        break;
-      default:
-        this._errorMessage = "";
-        break;
+      }
+
     }
+    if (n === 0) {
+      this._errorMessage = ErrorMessages.emptyFormula;
+    } 
+
+
+    // switch (formula.length) {
+    //   case 0:
+    //     this._errorMessage = ErrorMessages.emptyFormula;
+    //     break;
+    //   case 7:
+    //     this._errorMessage = ErrorMessages.partial;
+    //     break;
+    //   case 8:
+    //     this._errorMessage = ErrorMessages.divideByZero;
+    //     break;
+    //   case 9:
+    //     this._errorMessage = ErrorMessages.invalidCell;
+    //     break;
+    //   case 10:
+    //     this._errorMessage = ErrorMessages.invalidFormula;
+    //     break;
+    //   case 11:
+    //     this._errorMessage = ErrorMessages.invalidNumber;
+    //     break;
+    //   case 12:
+    //     this._errorMessage = ErrorMessages.invalidOperator;
+    //     break;
+    //   case 13:
+    //     this._errorMessage = ErrorMessages.missingParentheses;
+    //     break;
+    //   default:
+    //     this._errorMessage = "";
+    //     break;
+    // }
   }
 
   public get error(): string {
