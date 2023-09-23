@@ -107,6 +107,7 @@ export class FormulaEvaluator {
   evaluate(formula: FormulaType) {
 
     this._result = this.calculate(formula);
+    
     const n: number = formula.length;
     for (let i = 0; i < n; i++) {
       let j = i-1;

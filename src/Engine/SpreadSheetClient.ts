@@ -17,7 +17,7 @@ import { PortsGlobal } from '../PortsGlobal';
 
 class SpreadSheetClient {
     private _serverPort: number = PortsGlobal.serverPort;
-    private _baseURL: string = `http://pencil.local:${this._serverPort}`;
+    private _baseURL: string = `http://localhost:${this._serverPort}`;
     private _userName: string = 'juancho';
     private _documentName: string = 'test';
     private _document: DocumentTransport;
@@ -191,7 +191,7 @@ class SpreadSheetClient {
         if (isEditing) {
             requestEditViewURL = `${this._baseURL}/document/cell/edit/${this._documentName}/${this._document.currentCell}`;
         }
-        console.log(this._userName);
+  
         fetch(requestEditViewURL, {
             method: 'PUT',
             headers: {
@@ -210,6 +210,7 @@ class SpreadSheetClient {
 
     public addToken(token: string): void {
         const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${token}`;
+        console.log(requestAddTokenURL);
         fetch(requestAddTokenURL, {
             method: 'PUT',
             headers: {
@@ -280,7 +281,21 @@ class SpreadSheetClient {
     }
 
     public clearFormula(): void {
-        return;
+
+        const requestClearFormulaURL = `${this._baseURL}/document/clearFormula/${this._documentName}`;
+        fetch(requestClearFormulaURL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "userName": this._userName })
+        })
+            .then(response => {
+                return response.json() as Promise<DocumentTransport>;
+            }
+            ).then((document: DocumentTransport) => {
+                this._updateDocument(document);
+            });
     }
 
 
@@ -352,6 +367,12 @@ class SpreadSheetClient {
 
     }
 
+    public checkUserLogin():void{
+        if (this._userName.length === 0) {
+          alert("Please enter a user name");
+        }
+      }
+    
 }
 
 
