@@ -174,9 +174,9 @@ app.put('/document/cell/view/:name/:cell', (req: express.Request, res: express.R
     res.status(200).send(documentJSON);
 });
 
-app.put('/document/addtoken/:name/:token', (req: express.Request, res: express.Response) => {
+app.put('/document/addtoken/:name/@:token', (req: express.Request, res: express.Response) => {
     const name = req.params.name;
-    const token = req.params.token;
+    let token = req.params.token;
     // is this name valid?
     const documentNames = documentHolder.getDocumentNames();
     if (documentNames.indexOf(name) === -1) {
@@ -190,6 +190,8 @@ app.put('/document/addtoken/:name/:token', (req: express.Request, res: express.R
         return;
     }
     // add the
+    if (token === '_') token = '/';
+    console.log(token);
     const resultJSON = documentHolder.addToken(name, token, userName);
 
 
