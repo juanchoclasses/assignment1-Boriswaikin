@@ -209,8 +209,9 @@ class SpreadSheetClient {
 
 
     public addToken(token: string): void {
-        const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${token}`;
-        console.log(requestAddTokenURL);
+        if (token === '/') token = '_';
+        const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/@${token}`;
+        
         fetch(requestAddTokenURL, {
             method: 'PUT',
             headers: {
@@ -265,7 +266,7 @@ class SpreadSheetClient {
 
     public requestViewByLabel(label: string): void {
         const requestViewURL = `${this._baseURL}/document/cell/view/${this._documentName}/${label}`;
-        console.log(this._userName);
+      
         fetch(requestViewURL, {
             method: 'PUT',
             headers: {

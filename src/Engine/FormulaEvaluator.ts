@@ -1,6 +1,7 @@
 import Cell from "./Cell"
 import SheetMemory from "./SheetMemory"
 import { ErrorMessages } from "./GlobalDefinitions";
+import { runInThisContext } from "vm";
 
 export class FormulaEvaluator {
   // Define a function called update that takes a string parameter and returns a number
@@ -46,21 +47,29 @@ export class FormulaEvaluator {
     let num: number = 0;
     let sign: string = '+';
     let braces: number = 0;
+    this._errorMessage = "";
     const n: number = formula.length;
     for (let i = 0; i < n; i++) {
       const str: string = formula[i];
-      if (/\d/.test(str)) {
-        num = num * 10 + parseInt(str,10);
+      
+      if (this.isNumber(str)) {
+        if (str.indexOf('.') === -1) num = num * 10 + parseInt(str,10);
+        else num = parseFloat(str);
       }
-      else if (str === "(" && i!==n-1){
+      else if (this.isCellReference(str)) {
+          num = this.getCellValue(str)[0];
+          this._errorMessage = this.getCellValue(str)[1];
+      }
+      else if (str === '(' && i!==n-1){
         let j: number;
         braces = 1;
         for (j = i + 1; j < n; j++) {
-          if (formula[j] === "(") braces++;
-          else if (formula[j] === ")") braces--;
+          if (formula[j] === '(') braces++;
+          else if (formula[j] === ')') braces--;
           if (braces === 0) break;
         }
         num = this.calculate(formula.slice(i + 1, j));
+        if (i+1 === j) this._errorMessage = ErrorMessages.invalidFormula;
         i = j;
       }
       else if (str === ")") {
@@ -76,19 +85,25 @@ export class FormulaEvaluator {
                 break;
             case '*':
                 var val: number | undefined = stack.pop();
-                if (val!=undefined) stack.push(val * num);
+                if (val!=undefined) {
+                  const roundVal = parseFloat((val * num).toFixed(12));
+                  stack.push(roundVal);
+                }
                 break;
             case '/':
                 var val: number | undefined = stack.pop();
-                if (val!=undefined) stack.push(val / num);
+                if (val!=undefined) {
+                  const roundVal = parseFloat((val / num).toFixed(12));
+                  stack.push(roundVal);
+                }
                 if (num === 0) {this._errorMessage = ErrorMessages.divideByZero;}
                 break;
         }
         num = 0;
         sign = str;
       }
-      //check if the last str is '+','-','*','/' 
-      if (i===n-1 && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
+      //check if the first or last str is '+','-','*','/' 
+      if ((i===n-1||i==0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
         this._errorMessage = ErrorMessages.invalidFormula;
       }
       //check if the last str is ')' but without '(' before 
@@ -113,7 +128,7 @@ export class FormulaEvaluator {
       let j = i-1;
       const str: string = formula[i];
       const str2: string = formula[j];
-      if (i>0 && !/\d/.test(str) && !/\d/.test(str2)) {
+      if (i>0 && !isNaN(Number(str)) && !isNaN(Number(str2))) {
         this._errorMessage = ErrorMessages.invalidFormula;
       }
 
@@ -160,9 +175,6 @@ export class FormulaEvaluator {
   public get result(): number {
     return this._result;
   }
-
-
-
 
   /**
    * 
