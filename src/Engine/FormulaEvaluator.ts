@@ -60,7 +60,7 @@ export class FormulaEvaluator {
           num = this.getCellValue(str)[0];
           this._errorMessage = this.getCellValue(str)[1];
       }
-      else if (str === '(' && i!==n-1){
+      else if (str === '('){
         let j: number;
         braces = 1;
         for (j = i + 1; j < n; j++) {
@@ -106,11 +106,11 @@ export class FormulaEvaluator {
       if ((i===n-1||i==0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
         this._errorMessage = ErrorMessages.invalidFormula;
       }
-      //check if the last str is ')' but without '(' before 
-      //check if the formula only contains '('
-      if (braces === -1 || braces === 1){
-        this._errorMessage = ErrorMessages.missingParentheses;
-      }
+    }
+    //check if the str contains ')' but without '(' before 
+    //check if the formula only contains '('
+    if (braces === -1 || braces === 1){
+      this._errorMessage = ErrorMessages.missingParentheses;
     }
     let result: number = 0;
     //Design for the case ["(", "8"], it returns 8
