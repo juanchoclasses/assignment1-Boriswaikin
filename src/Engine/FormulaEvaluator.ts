@@ -51,8 +51,13 @@ export class FormulaEvaluator {
     const n: number = formula.length;
     for (let i = 0; i < n; i++) {
       const str: string = formula[i];
-      
-      if (this.isNumber(str)) {
+      //check if the string started with .
+      if (str.indexOf('.') === 0) {
+        this._errorMessage = ErrorMessages.invalidNumber; 
+        break;
+      }
+      else if (this.isNumber(str)) {
+        console.log("str", str);
         if (str.indexOf('.') === -1) num = num * 10 + parseInt(str,10);
         else num = parseFloat(str);
       }
@@ -63,6 +68,9 @@ export class FormulaEvaluator {
       else if (str === '('){
         let j: number;
         braces = 1;
+        if (i!=0 && (formula[i-1]!='+' && formula[i-1]!='-' && formula[i-1]!='*' && formula[i-1]!='/')) {
+          this._errorMessage = ErrorMessages.invalidFormula;
+          break;}
         for (j = i + 1; j < n; j++) {
           if (formula[j] === '(') braces++;
           else if (formula[j] === ')') braces--;
@@ -103,8 +111,10 @@ export class FormulaEvaluator {
         sign = str;
       }
       //check if the first or last str is '+','-','*','/' 
-      if ((i===n-1||i==0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
+      if ((i===n-1||i===0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
+        console.log("check");
         this._errorMessage = ErrorMessages.invalidFormula;
+        break;
       }
     }
     //check if the str contains ')' but without '(' before 
@@ -113,7 +123,6 @@ export class FormulaEvaluator {
       this._errorMessage = ErrorMessages.missingParentheses;
     }
     let result: number = 0;
-    //Design for the case ["(", "8"], it returns 8
     if (stack.length > 0)  while (stack.length > 0) result += stack.pop()!;
     else result = num;
     return result;
@@ -122,50 +131,23 @@ export class FormulaEvaluator {
   evaluate(formula: FormulaType) {
 
     this._result = this.calculate(formula);
-    
     const n: number = formula.length;
-    for (let i = 0; i < n; i++) {
+    //check if two adjacent tokens are both operators ie. 3*/4
+    for (let i = 1; i < n; i++) {
       let j = i-1;
       const str: string = formula[i];
+      let sign1 = 0;
+      let sign2= 0;
+      if (str === '+' || str === '-' || str === '*' || str === '/') sign1 =1;
       const str2: string = formula[j];
-      if (i>0 && !isNaN(Number(str)) && !isNaN(Number(str2))) {
+      if (str2 === '+' || str2 === '-' || str2 === '*' || str2 === '/') sign2 =1;
+      if (sign1 ===1 && sign2 ===1) {
         this._errorMessage = ErrorMessages.invalidFormula;
       }
-
     }
     if (n === 0) {
       this._errorMessage = ErrorMessages.emptyFormula;
     } 
-
-    // switch (formula.length) {
-    //   case 0:
-    //     this._errorMessage = ErrorMessages.emptyFormula;
-    //     break;
-    //   case 7:
-    //     this._errorMessage = ErrorMessages.partial;
-    //     break;
-    //   case 8:
-    //     this._errorMessage = ErrorMessages.divideByZero;
-    //     break;
-    //   case 9:
-    //     this._errorMessage = ErrorMessages.invalidCell;
-    //     break;
-    //   case 10:
-    //     this._errorMessage = ErrorMessages.invalidFormula;
-    //     break;
-    //   case 11:
-    //     this._errorMessage = ErrorMessages.invalidNumber;
-    //     break;
-    //   case 12:
-    //     this._errorMessage = ErrorMessages.invalidOperator;
-    //     break;
-    //   case 13:
-    //     this._errorMessage = ErrorMessages.missingParentheses;
-    //     break;
-    //   default:
-    //     this._errorMessage = "";
-    //     break;
-    // }
   }
 
   public get error(): string {
