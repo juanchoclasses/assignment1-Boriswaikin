@@ -174,7 +174,7 @@ describe("FormulaEvaluator", () => {
         let error = recalc.error;
 
         expect(result).toEqual(0);
-        expect(error).toEqual(ErrorMessages.missingParentheses);
+        expect(error).toEqual(ErrorMessages.invalidFormula);
       });
     });
 
