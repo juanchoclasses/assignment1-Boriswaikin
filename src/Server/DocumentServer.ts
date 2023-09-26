@@ -174,7 +174,7 @@ app.put('/document/cell/view/:name/:cell', (req: express.Request, res: express.R
     res.status(200).send(documentJSON);
 });
 
-app.put('/document/addtoken/:name/@:token', (req: express.Request, res: express.Response) => {
+app.put('/document/addtoken/:name/:token', (req: express.Request, res: express.Response) => {
     const name = req.params.name;
     let token = req.params.token;
     // is this name valid?
@@ -189,8 +189,8 @@ app.put('/document/addtoken/:name/@:token', (req: express.Request, res: express.
         res.status(400).send('userName is required');
         return;
     }
-    // add the
-    if (token === '_') token = '/';
+    // change back '@' to '.'
+    if (token === '@') token = '.';
     console.log(token);
     const resultJSON = documentHolder.addToken(name, token, userName);
 

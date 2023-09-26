@@ -49,6 +49,9 @@ export class FormulaEvaluator {
     let braces: number = 0;
     this._errorMessage = "";
     const n: number = formula.length;
+    if (n === 0) {
+      this._errorMessage = ErrorMessages.emptyFormula;
+    } 
     for (let i = 0; i < n; i++) {
       const str: string = formula[i];
       //check if the string started with .
@@ -56,11 +59,18 @@ export class FormulaEvaluator {
         this._errorMessage = ErrorMessages.invalidNumber; 
         break;
       }
-      else if (this.isNumber(str)) {
+      //cannot have 0 at start but not following by '.' 
+      if (str.indexOf('0')===0 && !str.includes('0.') && str!=='0') {
+        this._errorMessage = ErrorMessages.invalidNumber; 
+        break;
+      }
+      //if the string is a number
+      if (this.isNumber(str)) {
         console.log("str", str);
         if (str.indexOf('.') === -1) num = num * 10 + parseInt(str,10);
         else num = parseFloat(str);
       }
+      //if the string is a cell reference
       else if (this.isCellReference(str)) {
           num = this.getCellValue(str)[0];
           this._errorMessage = this.getCellValue(str)[1];
@@ -70,7 +80,8 @@ export class FormulaEvaluator {
         braces = 1;
         if (i!=0 && (formula[i-1]!='+' && formula[i-1]!='-' && formula[i-1]!='*' && formula[i-1]!='/')) {
           this._errorMessage = ErrorMessages.invalidFormula;
-          break;}
+          break;
+        }
         for (j = i + 1; j < n; j++) {
           if (formula[j] === '(') braces++;
           else if (formula[j] === ')') braces--;
@@ -83,6 +94,19 @@ export class FormulaEvaluator {
       else if (str === ")") {
         braces = -1;
       }
+      // check if two adjacent tokens are both operators ie. 3*/4
+      let j = 0;
+      if (i>0) j = i-1;
+      let sign1 = 0;
+      let sign2= 0;
+      if (str === '+' || str === '-' || str === '*' || str === '/') sign1 =1;
+      const str2: string = formula[j];
+      if (str2 === '+' || str2 === '-' || str2 === '*' || str2 === '/') sign2 =1;
+      if (sign1 ===1 && sign2 ===1) {
+        this._errorMessage = ErrorMessages.invalidFormula;
+        break;
+      }
+
       if (str === '+' || str === '-' || str === '*' || str === '/' || i === n - 1) {
         switch (sign) {
             case '+':
@@ -112,7 +136,6 @@ export class FormulaEvaluator {
       }
       //check if the first or last str is '+','-','*','/' 
       if ((i===n-1||i===0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
-        console.log("check");
         this._errorMessage = ErrorMessages.invalidFormula;
         break;
       }
@@ -122,32 +145,15 @@ export class FormulaEvaluator {
     if (braces === -1 || braces === 1){
       this._errorMessage = ErrorMessages.missingParentheses;
     }
+
     let result: number = 0;
     if (stack.length > 0)  while (stack.length > 0) result += stack.pop()!;
     else result = num;
-    return result;
+    return parseFloat((result).toFixed(12));
   }
 
   evaluate(formula: FormulaType) {
-
     this._result = this.calculate(formula);
-    const n: number = formula.length;
-    //check if two adjacent tokens are both operators ie. 3*/4
-    for (let i = 1; i < n; i++) {
-      let j = i-1;
-      const str: string = formula[i];
-      let sign1 = 0;
-      let sign2= 0;
-      if (str === '+' || str === '-' || str === '*' || str === '/') sign1 =1;
-      const str2: string = formula[j];
-      if (str2 === '+' || str2 === '-' || str2 === '*' || str2 === '/') sign2 =1;
-      if (sign1 ===1 && sign2 ===1) {
-        this._errorMessage = ErrorMessages.invalidFormula;
-      }
-    }
-    if (n === 0) {
-      this._errorMessage = ErrorMessages.emptyFormula;
-    } 
   }
 
   public get error(): string {
@@ -202,14 +208,9 @@ export class FormulaEvaluator {
       return [0, ErrorMessages.invalidCell];
     }
   
-
-
     let value = cell.getValue();
     return [value, ""];
-
   }
-
-
 }
 
 export default FormulaEvaluator;
