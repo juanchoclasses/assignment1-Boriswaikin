@@ -54,12 +54,12 @@ export class FormulaEvaluator {
     } 
     for (let i = 0; i < n; i++) {
       const str: string = formula[i];
-      //check if the string started with .
+      //Return error if the string started with . 
       if (str.indexOf('.') === 0) {
         this._errorMessage = ErrorMessages.invalidNumber; 
         break;
       }
-      //cannot have 0 at start but not following by '.' 
+      //Return error if having 0 at start but not following by '.' 
       if (str.indexOf('0')===0 && !str.includes('0.') && str!=='0') {
         this._errorMessage = ErrorMessages.invalidNumber; 
         break;
@@ -95,7 +95,7 @@ export class FormulaEvaluator {
       else if (str === ')') {
         braces = -1;
       }
-      // check if two adjacent tokens are both operators ie. 3*/4, return invalid formula
+      // return error if two adjacent tokens are both operators ie. 3*/4, 
       let j = 0;
       if (i>0) j = i-1;
       let sign1 = 0;
@@ -129,20 +129,21 @@ export class FormulaEvaluator {
                   const roundVal = parseFloat((val / num).toFixed(12));
                   stack.push(roundVal);
                 }
+                //Return error if devide by 0
                 if (num === 0) {this._errorMessage = ErrorMessages.divideByZero;}
                 break;
         }
         num = 0;
         sign = str;
       }
-      //check if the first or last str is '+','-','*','/','.' return invalid formula
+      //Return error if the first or last str is '+','-','*','/','.' 
       if ((i===n-1||i===0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/'|| str.slice(-1) === '.')){
         this._errorMessage = ErrorMessages.invalidFormula;
         break;
       }
     }
-    //check if the str contains ')' but without '(' before 
-    //check if the formula only contains '('
+    //Return error if the str contains ')' but without '(' before 
+    //Return error if the formula only contains '('
     if (braces === -1 || braces === 1){
       this._errorMessage = ErrorMessages.missingParentheses;
     }
