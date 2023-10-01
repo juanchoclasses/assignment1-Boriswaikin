@@ -211,9 +211,9 @@ class SpreadSheetClient {
 
 
     public addToken(token: string): void {
-        // change '/' to '%2F'
+        // change '/' to '%2F' for handling devision case
         if (token === '/') token = '%2F';
-        // change '.' to '@'
+        // change '.' to '@' for handling floating point case
         if (token === '.') token = '@';
         const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${token}`;
         
