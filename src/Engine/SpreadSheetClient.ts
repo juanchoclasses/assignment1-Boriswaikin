@@ -72,9 +72,11 @@ class SpreadSheetClient {
             setTimeout(() => {
                 fetch(url, options)
                     .then(response => {
-                        this.getDocument(this._documentName, this._userName);
-                        this._timedFetch();
-                        resolve(response);
+                        if (this.userName.length !=0){
+                            this.getDocument(this._documentName, this._userName);
+                            this._timedFetch();
+                            resolve(response);
+                        }
                     })
                     .catch(error => {
                         reject(error);
@@ -329,7 +331,6 @@ class SpreadSheetClient {
                 this._updateDocument(document);
 
             });
-
     }
 
 

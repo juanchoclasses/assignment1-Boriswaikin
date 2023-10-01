@@ -191,7 +191,6 @@ app.put('/document/addtoken/:name/:token', (req: express.Request, res: express.R
     }
     // change back '@' to '.'
     if (token === '@') token = '.';
-    console.log(token);
     const resultJSON = documentHolder.addToken(name, token, userName);
 
 

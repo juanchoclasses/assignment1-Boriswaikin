@@ -118,12 +118,12 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
    * */
   function onButtonClick(event: React.MouseEvent<HTMLButtonElement>): void {
 
+    spreadSheetClient.checkUserLogin();
     const text = event.currentTarget.textContent;
     let trueText = text ? text : "";
     spreadSheetClient.setEditStatus(true);
     spreadSheetClient.addToken(trueText);
 
-    spreadSheetClient.checkUserLogin();
     updateDisplayValues();
 
   }
@@ -139,6 +139,7 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
    */
   function onCellClick(event: React.MouseEvent<HTMLButtonElement>): void {
 
+    spreadSheetClient.checkUserLogin();
     const cellLabel = event.currentTarget.getAttribute("cell-label");
     // calculate the current row and column of the clicked on cell
 
@@ -154,8 +155,6 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
     // if the edit status is false then set the current cell to the clicked on cell
     else {
       spreadSheetClient.requestViewByLabel(realCellLabel);
-
-      spreadSheetClient.checkUserLogin();
       updateDisplayValues();
     }
 

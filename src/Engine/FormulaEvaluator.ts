@@ -78,6 +78,7 @@ export class FormulaEvaluator {
       else if (str === '('){
         let j: number;
         braces = 1;
+        //if str before '(' is not an operator ie 3(4+5); return error invalid formula
         if (i!=0 && (formula[i-1]!='+' && formula[i-1]!='-' && formula[i-1]!='*' && formula[i-1]!='/')) {
           this._errorMessage = ErrorMessages.invalidFormula;
           break;
@@ -91,10 +92,10 @@ export class FormulaEvaluator {
         if (i+1 === j) this._errorMessage = ErrorMessages.invalidFormula;
         i = j;
       }
-      else if (str === ")") {
+      else if (str === ')') {
         braces = -1;
       }
-      // check if two adjacent tokens are both operators ie. 3*/4
+      // check if two adjacent tokens are both operators ie. 3*/4, return invalid formula
       let j = 0;
       if (i>0) j = i-1;
       let sign1 = 0;
@@ -134,8 +135,8 @@ export class FormulaEvaluator {
         num = 0;
         sign = str;
       }
-      //check if the first or last str is '+','-','*','/' 
-      if ((i===n-1||i===0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/')){
+      //check if the first or last str is '+','-','*','/','.' return invalid formula
+      if ((i===n-1||i===0) && (formula[i] === '+' || formula[i] === '-' || formula[i] === '*' || formula[i] === '/'|| str.slice(-1) === '.')){
         this._errorMessage = ErrorMessages.invalidFormula;
         break;
       }
@@ -147,8 +148,8 @@ export class FormulaEvaluator {
     }
 
     let result: number = 0;
-    if (stack.length > 0)  while (stack.length > 0) result += stack.pop()!;
-    else result = num;
+    while (stack.length > 0) result += stack.pop()!;
+    result += num;
     return parseFloat((result).toFixed(12));
   }
 

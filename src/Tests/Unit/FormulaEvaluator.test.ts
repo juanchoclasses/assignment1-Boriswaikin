@@ -180,7 +180,7 @@ describe("FormulaEvaluator", () => {
 
     describe("when the formula contains 8 ( ", () => {
       it("returns a syntax error", () => {
-        const formula: FormulaType = ["(", "8"];
+        const formula: FormulaType = ["8", "("];
         recalc.evaluate(formula);
 
         let result = recalc.result;
