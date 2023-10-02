@@ -69,6 +69,7 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
 
   }
 
+
   /**
    * 
    * @param event 
@@ -82,8 +83,9 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
    * the other buttons do require asynchronous processing and so the function is marked async
    */
   async function onCommandButtonClick(text: string): Promise<void> {
-
-
+    
+    //check if the user name is empty when interacting with the spreadsheet 
+    spreadSheetClient.checkUserLogin();
     switch (text) {
       case ButtonNames.edit_toggle:
         if (currentlyEditing) {
@@ -117,6 +119,8 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
    * */
   function onButtonClick(event: React.MouseEvent<HTMLButtonElement>): void {
 
+    //check if the user name is empty when interacting with the spreadsheet 
+    spreadSheetClient.checkUserLogin();
     const text = event.currentTarget.textContent;
     let trueText = text ? text : "";
     spreadSheetClient.setEditStatus(true);
@@ -137,6 +141,8 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
    */
   function onCellClick(event: React.MouseEvent<HTMLButtonElement>): void {
 
+    //check if the user name is empty when interacting with the spreadsheet 
+    spreadSheetClient.checkUserLogin();
     const cellLabel = event.currentTarget.getAttribute("cell-label");
     // calculate the current row and column of the clicked on cell
 
@@ -152,7 +158,6 @@ function SpreadSheet({ documentName }: SpreadSheetProps) {
     // if the edit status is false then set the current cell to the clicked on cell
     else {
       spreadSheetClient.requestViewByLabel(realCellLabel);
-
       updateDisplayValues();
     }
 

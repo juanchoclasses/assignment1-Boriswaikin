@@ -211,7 +211,7 @@ export class SpreadSheetController {
     if (!userData.isEditing) {
       return;
     }
-
+    
 
     userData.formulaBuilder.addToken(token);
     let cellBeingEdited = this._contributingUsers.get(user)?.cellLabel;
@@ -262,7 +262,7 @@ export class SpreadSheetController {
     // Check to see if we would be introducing a circular dependency
     // this function will update the dependency for the cell being inserted
     let okToAdd = this._calculationManager.okToAddNewDependency(currentLabel, cellReference, this._memory);
-
+   
     // We have checked to see if this new token introduces a circular dependency
     // if it does not then we can add the token to the formula
     if (okToAdd) {

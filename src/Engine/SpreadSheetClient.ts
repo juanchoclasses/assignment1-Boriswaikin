@@ -17,7 +17,7 @@ import { PortsGlobal } from '../PortsGlobal';
 
 class SpreadSheetClient {
     private _serverPort: number = PortsGlobal.serverPort;
-    private _baseURL: string = `http://pencil.local:${this._serverPort}`;
+    private _baseURL: string = `http://localhost:${this._serverPort}`;
     private _userName: string = 'juancho';
     private _documentName: string = 'test';
     private _document: DocumentTransport;
@@ -72,9 +72,11 @@ class SpreadSheetClient {
             setTimeout(() => {
                 fetch(url, options)
                     .then(response => {
-                        this.getDocument(this._documentName, this._userName);
-                        this._timedFetch();
-                        resolve(response);
+                        if (this.userName.length !=0){
+                            this.getDocument(this._documentName, this._userName);
+                            this._timedFetch();
+                            resolve(response);
+                        }
                     })
                     .catch(error => {
                         reject(error);
@@ -191,7 +193,7 @@ class SpreadSheetClient {
         if (isEditing) {
             requestEditViewURL = `${this._baseURL}/document/cell/edit/${this._documentName}/${this._document.currentCell}`;
         }
-        console.log(this._userName);
+  
         fetch(requestEditViewURL, {
             method: 'PUT',
             headers: {
@@ -209,7 +211,12 @@ class SpreadSheetClient {
 
 
     public addToken(token: string): void {
+        // change '/' to '%2F' for handling devision case
+        if (token === '/') token = '%2F';
+        // change '.' to '@' for handling floating point case
+        if (token === '.') token = '@';
         const requestAddTokenURL = `${this._baseURL}/document/addtoken/${this._documentName}/${token}`;
+        
         fetch(requestAddTokenURL, {
             method: 'PUT',
             headers: {
@@ -264,7 +271,7 @@ class SpreadSheetClient {
 
     public requestViewByLabel(label: string): void {
         const requestViewURL = `${this._baseURL}/document/cell/view/${this._documentName}/${label}`;
-        console.log(this._userName);
+      
         fetch(requestViewURL, {
             method: 'PUT',
             headers: {
@@ -280,7 +287,21 @@ class SpreadSheetClient {
     }
 
     public clearFormula(): void {
-        return;
+
+        const requestClearFormulaURL = `${this._baseURL}/document/clearFormula/${this._documentName}`;
+        fetch(requestClearFormulaURL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "userName": this._userName })
+        })
+            .then(response => {
+                return response.json() as Promise<DocumentTransport>;
+            }
+            ).then((document: DocumentTransport) => {
+                this._updateDocument(document);
+            });
     }
 
 
@@ -310,7 +331,6 @@ class SpreadSheetClient {
                 this._updateDocument(document);
 
             });
-
     }
 
 
@@ -352,6 +372,12 @@ class SpreadSheetClient {
 
     }
 
+    public checkUserLogin():void{
+        if (this._userName.length === 0) {
+          alert("Please enter a user name");
+        }
+      }
+    
 }
 
 
