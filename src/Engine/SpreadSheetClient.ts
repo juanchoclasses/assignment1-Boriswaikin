@@ -72,7 +72,7 @@ class SpreadSheetClient {
             setTimeout(() => {
                 fetch(url, options)
                     .then(response => {
-                        if (this.userName.length !=0){
+                        if (this.userName.length !==0){
                             this.getDocument(this._documentName, this._userName);
                             this._timedFetch();
                             resolve(response);
